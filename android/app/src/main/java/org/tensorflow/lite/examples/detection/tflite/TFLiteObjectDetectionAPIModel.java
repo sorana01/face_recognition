@@ -84,7 +84,7 @@ public class TFLiteObjectDetectionAPIModel
   // contains the number of detected boxes
   private float[] numDetections;
 
-  private float[][] embeedings;
+  private float[][] embeddings;
 
   private ByteBuffer imgData;
 
@@ -94,6 +94,7 @@ public class TFLiteObjectDetectionAPIModel
   private float[][] output;
 
   private HashMap<String, Recognition> registered = new HashMap<>();
+
   public void register(String name, Recognition rec) {
       registered.put(name, rec);
   }
@@ -168,8 +169,8 @@ public class TFLiteObjectDetectionAPIModel
     return d;
   }
 
-  // looks for the nearest embeeding in the dataset (using L2 norm)
-  // and retrurns the pair <id, distance>
+  // looks for the nearest embedding in the dataset (using L2 norm)
+  // and returns the pair <id, distance>
   private Pair<String, Float> findNearest(float[] emb) {
 
     Pair<String, Float> ret = null;
@@ -201,6 +202,7 @@ public class TFLiteObjectDetectionAPIModel
     Trace.beginSection("preprocessBitmap");
     // Preprocess the image data from 0-255 int to normalized float based
     // on the provided parameters.
+    // Prepare the image data suitable for input to TensorFlow model
     bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
     imgData.rewind();
@@ -232,8 +234,8 @@ public class TFLiteObjectDetectionAPIModel
 // Here outputMap is changed to fit the Face Mask detector
     Map<Integer, Object> outputMap = new HashMap<>();
 
-    embeedings = new float[1][OUTPUT_SIZE];
-    outputMap.put(0, embeedings);
+    embeddings = new float[1][OUTPUT_SIZE];
+    outputMap.put(0, embeddings);
 
 
     // Run the inference call.
@@ -243,9 +245,9 @@ public class TFLiteObjectDetectionAPIModel
     Trace.endSection();
 
 //    String res = "[";
-//    for (int i = 0; i < embeedings[0].length; i++) {
-//      res += embeedings[0][i];
-//      if (i < embeedings[0].length - 1) res += ", ";
+//    for (int i = 0; i < embeddings[0].length; i++) {
+//      res += embeddings[0][i];
+//      if (i < embeddings[0].length - 1) res += ", ";
 //    }
 //    res += "]";
 
@@ -256,7 +258,7 @@ public class TFLiteObjectDetectionAPIModel
 
     if (registered.size() > 0) {
         //LOGGER.i("dataset SIZE: " + registered.size());
-        final Pair<String, Float> nearest = findNearest(embeedings[0]);
+        final Pair<String, Float> nearest = findNearest(embeddings[0]);
         if (nearest != null) {
 
             final String name = nearest.first;
@@ -281,10 +283,10 @@ public class TFLiteObjectDetectionAPIModel
     recognitions.add( rec );
 
     if (storeExtra) {
-        rec.setExtra(embeedings);
+        rec.setExtra(embeddings);
     }
 
-    Trace.endSection();
+    Trace.endSection();   //recognizeImage
     return recognitions;
   }
 

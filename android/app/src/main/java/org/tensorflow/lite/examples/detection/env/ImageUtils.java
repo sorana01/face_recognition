@@ -85,6 +85,7 @@ public class ImageUtils {
     }
   }
 
+  //converts an entire YUV420sp (semi-planar) frame to an ARGB8888 image frame
   public static void convertYUV420SPToARGB8888(byte[] input, int width, int height, int[] output) {
     final int frameSize = width * height;
     for (int j = 0, yp = 0; j < height; j++) {
@@ -104,6 +105,7 @@ public class ImageUtils {
     }
   }
 
+  // converts a single YUV pixel into RGB
   private static int YUV2RGB(int y, int u, int v) {
     // Adjust and check YUV values
     y = (y - 16) < 0 ? 0 : (y - 16);
@@ -128,6 +130,8 @@ public class ImageUtils {
     return 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
   }
 
+  // converts from YUV420 planar format data
+  // Y, U, V stored in separate arrays
   public static void convertYUV420ToARGB8888(
       byte[] yData,
       byte[] uData,

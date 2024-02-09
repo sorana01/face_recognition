@@ -26,7 +26,9 @@ android {
     }
     lintOptions {
         abortOnError false
+        disable 'LogTagMismatch'
     }
+    ndkVersion '26.1.10909125'
 }
 
 // import DownloadModels task
@@ -37,7 +39,7 @@ project.ext.TMP_DIR   = project.buildDir.toString() + '/downloads'
 // place them in the "assets" directory and comment out this line.
 //apply from: "download_model.gradle"
 
-//apply from:'download_model.gradle'
+apply from:'download_model.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
