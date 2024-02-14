@@ -137,6 +137,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
     btnSwitchCam = findViewById(R.id.fab_switchcam);
 
+    //gestureLayout is orange arrow that opens the details regarding frames
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
         new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -296,6 +297,7 @@ public abstract class CameraActivity extends AppCompatActivity
     processImage();
   }
 
+  //called everytime a frame is processed
   /** Callback for Camera2 API */
   @Override
   public void onImageAvailable(final ImageReader reader) {
@@ -464,6 +466,7 @@ public abstract class CameraActivity extends AppCompatActivity
     return requiredLevel <= deviceLevel;
   }
 
+  // depending on the device's capabilities
    private String chooseCamera() {
 
         final CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -523,6 +526,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
         Fragment fragment;
         if (useCamera2API) {
+          // if camera2API => create a CameraConnection
             CameraConnectionFragment camera2Fragment =
                     CameraConnectionFragment.newInstance(
                             new CameraConnectionFragment.ConnectionCallback() {

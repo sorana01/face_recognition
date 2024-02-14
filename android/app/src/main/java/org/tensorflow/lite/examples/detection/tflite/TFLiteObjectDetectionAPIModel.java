@@ -97,6 +97,7 @@ public class TFLiteObjectDetectionAPIModel
 
   public void register(String name, Recognition rec) {
       registered.put(name, rec);
+      LOGGER.i("Registered new face: " + name + " ," + rec);
   }
 
   private TFLiteObjectDetectionAPIModel() {}
@@ -226,9 +227,7 @@ public class TFLiteObjectDetectionAPIModel
     // Copy the input data into TensorFlow.
     Trace.beginSection("feed");
 
-
     Object[] inputArray = {imgData};
-
     Trace.endSection();
 
 // Here outputMap is changed to fit the Face Mask detector
@@ -240,16 +239,9 @@ public class TFLiteObjectDetectionAPIModel
 
     // Run the inference call.
     Trace.beginSection("run");
-    //tfLite.runForMultipleInputsOutputs(inputArray, outputMapBack);
+
     tfLite.runForMultipleInputsOutputs(inputArray, outputMap);
     Trace.endSection();
-
-//    String res = "[";
-//    for (int i = 0; i < embeddings[0].length; i++) {
-//      res += embeddings[0][i];
-//      if (i < embeddings[0].length - 1) res += ", ";
-//    }
-//    res += "]";
 
 
     float distance = Float.MAX_VALUE;
@@ -257,7 +249,7 @@ public class TFLiteObjectDetectionAPIModel
     String label = "?";
 
     if (registered.size() > 0) {
-        //LOGGER.i("dataset SIZE: " + registered.size());
+        LOGGER.i("dataset SIZE: " + registered.size());
         final Pair<String, Float> nearest = findNearest(embeddings[0]);
         if (nearest != null) {
 
@@ -270,6 +262,8 @@ public class TFLiteObjectDetectionAPIModel
 
         }
     }
+    //    else Label as unknown if not found??
+
 
 
     final int numDetectionsOutput = 1;

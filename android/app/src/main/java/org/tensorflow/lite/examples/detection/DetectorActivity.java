@@ -78,18 +78,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private static final int TF_OD_API_INPUT_SIZE = 112;
   private static final boolean TF_OD_API_IS_QUANTIZED = false;
   private static final String TF_OD_API_MODEL_FILE = "mobile_face_net.tflite";
-
-
   private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt";
-
   private static final DetectorMode MODE = DetectorMode.TF_OD_API;
   // Minimum detection confidence to track a detection.
   private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
   private static final boolean MAINTAIN_ASPECT = false;
 
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
-  //private static final int CROP_SIZE = 320;
-  //private static final Size CROP_SIZE = new Size(320, 320);
 
 
   private static final boolean SAVE_PREVIEW_BITMAP = false;
@@ -106,13 +101,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   private boolean computingDetection = false;
   private boolean addPending = false;
-  //private boolean adding = false;
 
   private long timestamp = 0;
 
   private Matrix frameToCropTransform;
   private Matrix cropToFrameTransform;
-  //private Matrix cropToPortraitTransform;
 
   private MultiBoxTracker tracker;
 
@@ -127,8 +120,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private Bitmap faceBmp = null;
 
   private FloatingActionButton fabAdd;
-
-  //private HashMap<String, Classifier.Recognition> knownFaces = new HashMap<>();
 
 
   @Override
@@ -157,17 +148,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     faceDetector = detector;
 
 
-    //checkWritePermission();
-
   }
 
 
 
   private void onAddClick() {
-
     addPending = true;
-    //Toast.makeText(this, "click", Toast.LENGTH_LONG ).show();
-
   }
 
   @Override
@@ -224,7 +210,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     croppedBitmap = Bitmap.createBitmap(cropW, cropH, Config.ARGB_8888);
 
+    // entire frame received from the camera
     portraitBmp = Bitmap.createBitmap(targetW, targetH, Config.ARGB_8888);
+    // one face from portraitBmp
     faceBmp = Bitmap.createBitmap(TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, Config.ARGB_8888);
 
     frameToCropTransform =
@@ -233,11 +221,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     cropW, cropH,
                     sensorOrientation, MAINTAIN_ASPECT);
 
-//    frameToCropTransform =
-//            ImageUtils.getTransformationMatrix(
-//                    previewWidth, previewHeight,
-//                    previewWidth, previewHeight,
-//                    sensorOrientation, MAINTAIN_ASPECT);
 
     cropToFrameTransform = new Matrix();
     frameToCropTransform.invert(cropToFrameTransform);
@@ -267,6 +250,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   }
 
 
+  // called after every frame is processed (see onImageAvailable in CameraActivity)
   @Override
   protected void processImage() {
     ++timestamp;
@@ -366,12 +350,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
       matrix.postRotate(applyRotation);
     }
 
-//        // Account for the already applied rotation, if any, and then determine how
-//        // much scaling is needed for each axis.
-//        final boolean transpose = (Math.abs(applyRotation) + 90) % 180 == 0;
-//        final int inWidth = transpose ? srcHeight : srcWidth;
-//        final int inHeight = transpose ? srcWidth : srcHeight;
-
     if (applyRotation != 0) {
 
       // Translate back from origin centered reference to destination frame.
@@ -415,10 +393,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   private void updateResults(long currTimestamp, final List<SimilarityClassifier.Recognition> mappedRecognitions) {
 
+    // handles drawing part
     tracker.trackResults(mappedRecognitions, currTimestamp);
     trackingOverlay.postInvalidate();
     computingDetection = false;
-    //adding = false;
 
 
     if (mappedRecognitions.size() > 0) {
@@ -490,6 +468,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
       LOGGER.i("Running detection on face " + currTimestamp);
       //results = detector.recognizeImage(croppedBitmap);
 
+      // for each face, bounding box generated
       final RectF boundingBox = new RectF(face.getBoundingBox());
 
       //final boolean goodConfidence = result.getConfidence() >= minimumConfidence;
@@ -504,16 +483,15 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         transform.mapRect(faceBB);
 
         // translates portrait to origin and scales to fit input inference size
-        //cv.drawRect(faceBB, paint);
         float sx = ((float) TF_OD_API_INPUT_SIZE) / faceBB.width();
         float sy = ((float) TF_OD_API_INPUT_SIZE) / faceBB.height();
         Matrix matrix = new Matrix();
         matrix.postTranslate(-faceBB.left, -faceBB.top);
         matrix.postScale(sx, sy);
 
+        //faceBmp from portraitBmp cropped
         cvFace.drawBitmap(portraitBmp, matrix, null);
 
-        //canvas.drawRect(faceBB, paint);
 
         String label = "";
         float confidence = -1f;
@@ -538,10 +516,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           SimilarityClassifier.Recognition result = resultsAux.get(0);
 
           extra = result.getExtra();
-//          Object extra = result.getExtra();
-//          if (extra != null) {
-//            LOGGER.i("embeeding retrieved " + extra.toString());
-//          }
 
           float conf = result.getDistance();
           if (conf < 1.0f) {
@@ -569,7 +543,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           else {
             flip.postScale(-1, 1, previewWidth / 2.0f, previewHeight / 2.0f);
           }
-          //flip.postScale(1, -1, targetW / 2.0f, targetH / 2.0f);
           flip.mapRect(boundingBox);
 
         }
@@ -588,12 +561,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     }
 
-    //    if (saved) {
-//      lastSaved = System.currentTimeMillis();
-//    }
-
     updateResults(currTimestamp, mappedRecognitions);
-
 
   }
 
