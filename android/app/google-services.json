@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "808683672395",
+    "project_id": "attendance-2e477",
+    "storage_bucket": "attendance-2e477.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808683672395:android:60bd84a3009a87abdbcece",
+        "android_client_info": {
+          "package_name": "org.tensorflow.lite.examples.facerecognition"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLKt1lTW4mpJ7gJZIm0uuFysqNBBFCSF8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

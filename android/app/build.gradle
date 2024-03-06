@@ -40,6 +40,7 @@ project.ext.TMP_DIR   = project.buildDir.toString() + '/downloads'
 //apply from: "download_model.gradle"
 
 apply from:'download_model.gradle'
+apply plugin: 'com.google.gms.google-services'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
@@ -47,6 +48,14 @@ dependencies {
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
+    implementation 'com.google.code.gson:gson:2.10.1'
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+
+    // Add the dependency for the Cloud Storage library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.google.truth:truth:1.0.1'

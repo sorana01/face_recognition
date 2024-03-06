@@ -174,7 +174,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                       TF_OD_API_MODEL_FILE,
                       TF_OD_API_LABELS_FILE,
                       TF_OD_API_INPUT_SIZE,
-                      TF_OD_API_IS_QUANTIZED);
+                      TF_OD_API_IS_QUANTIZED,
+                      DetectorActivity.this);
       //cropSize = TF_OD_API_INPUT_SIZE;
     } catch (final IOException e) {
       e.printStackTrace();
@@ -215,6 +216,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     // one face from portraitBmp
     faceBmp = Bitmap.createBitmap(TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, Config.ARGB_8888);
 
+    // converts coordinates from original bitmap to the cropped bitmap
     frameToCropTransform =
             ImageUtils.getTransformationMatrix(
                     previewWidth, previewHeight,
@@ -222,6 +224,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     sensorOrientation, MAINTAIN_ASPECT);
 
 
+    //converts coordinates from the cropped bitmap to the original bitmap
     cropToFrameTransform = new Matrix();
     frameToCropTransform.invert(cropToFrameTransform);
 
@@ -277,6 +280,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
       ImageUtils.saveBitmap(croppedBitmap);
     }
 
+    // detection is done on croppedBitmap
     InputImage image = InputImage.fromBitmap(croppedBitmap, 0);
     faceDetector
             .process(image)
@@ -381,8 +385,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           if (name.isEmpty()) {
               return;
           }
-          detector.register(name, rec);
-          //knownFaces.put(name, rec);
+          // register new face
+          detector.register(name, rec, DetectorActivity.this);
           dlg.dismiss();
       }
     });
@@ -400,7 +404,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
 
     if (mappedRecognitions.size() > 0) {
+      for (SimilarityClassifier.Recognition rec : mappedRecognitions) {
+        LOGGER.i("Elements in mappedRecognitions: ");
+        System.out.println(rec.getTitle());
+      }
+
        LOGGER.i("Adding results");
+      // takes only the first recognition in the image
        SimilarityClassifier.Recognition rec = mappedRecognitions.get(0);
        if (rec.getExtra() != null) {
          showAddFaceDialog(rec);
@@ -422,6 +432,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   private void onFacesDetected(long currTimestamp, List<Face> faces, boolean add) {
 
+    // face detection performed on croppedBitmap
     cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
     final Canvas canvas = new Canvas(cropCopyBitmap);
     final Paint paint = new Paint();
@@ -439,8 +450,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     final List<SimilarityClassifier.Recognition> mappedRecognitions =
             new LinkedList<SimilarityClassifier.Recognition>();
 
-
-    //final List<Classifier.Recognition> results = new ArrayList<>();
 
     // Note this can be done only once
     int sourceW = rgbFrameBitmap.getWidth();
@@ -466,7 +475,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
       LOGGER.i("FACE" + face.toString());
       LOGGER.i("Running detection on face " + currTimestamp);
-      //results = detector.recognizeImage(croppedBitmap);
 
       // for each face, bounding box generated
       final RectF boundingBox = new RectF(face.getBoundingBox());
@@ -500,6 +508,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         Bitmap crop = null;
 
         if (add) {
+          // face saved ?
           crop = Bitmap.createBitmap(portraitBmp,
                             (int) faceBB.left,
                             (int) faceBB.top,
@@ -508,6 +517,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         }
 
         final long startTime = SystemClock.uptimeMillis();
+
+        // one element array
         final List<SimilarityClassifier.Recognition> resultsAux = detector.recognizeImage(faceBmp, add);
         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
@@ -521,6 +532,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           if (conf < 1.0f) {
 
             confidence = conf;
+            // person  name
             label = result.getTitle();
             if (result.getId().equals("0")) {
               color = Color.GREEN;
@@ -561,6 +573,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     }
 
+    // called at the end of faces array
     updateResults(currTimestamp, mappedRecognitions);
 
   }

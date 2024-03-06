@@ -17,12 +17,18 @@ package org.tensorflow.lite.examples.detection.tflite;
 
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+
+import org.tensorflow.lite.examples.detection.DetectorActivity;
+
 import java.util.List;
 
 /** Generic interface for interacting with different recognition engines. */
 public interface SimilarityClassifier {
 
-  void register(String name, Recognition recognition);
+  void registerOld(String name, Recognition recognition);
+
+  void register(String name, Recognition recognition, DetectorActivity det);
+
 
   List<Recognition> recognizeImage(Bitmap bitmap, boolean getExtra);
 
@@ -51,6 +57,8 @@ public interface SimilarityClassifier {
      * A sortable score for how good the recognition is relative to others. Lower should be better.
      */
     private final Float distance;
+
+    /** Extra field to store any data (we are going to use it to store the EMBEDDINGS) */
     private Object extra;
 
     /** Optional location within the source image for the location of the recognized object. */
